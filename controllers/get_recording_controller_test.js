@@ -31,10 +31,10 @@ describe('Recording_controller', () => {
     const setUpMockRequest = () => {
       mockRequest = {
         params: {
-          // difference between start and end is 1 hour
+          // difference between start and end is 30 mins
           // which is maximum allowed by controller
-          startTime: 1536249600,
-          endTime: 1536253200,
+          startTime: 1536305400000,
+          endTime: 1536307200000,
           spaceId: '1A',
         },
       };
@@ -87,14 +87,44 @@ describe('Recording_controller', () => {
       expect(nextSpy.firstCall.args[0]).to.be.an.instanceof(Error);
     });
 
-    it('should pass 402 status code and error via Next to error handler if timeframe is more than 60 mins', async function () {
-      mockRequest.params.startTime = 1536249599;
+    it('should pass 422 status code and error via Next to error handler if timeframe is more than 30 mins', async function () {
+      mockRequest.params.startTime = 1536305399999;
 
       await getRecordingController
         .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse, nextSpy);
 
       expect(nextSpy.firstCall.args[0].status).to.equal(422);
-      expect(nextSpy.firstCall.args[0].message).to.equal('Timeframe is invalid as it is more than 60 minutes');
+      expect(nextSpy.firstCall.args[0].message).to.equal('Timeframe is invalid as it is more than 30 minutes');
+    });
+
+    it('should pass 422 status code and error via Next to error handler if start time is not passed', async function () {
+      mockRequest.params.startTime = '';
+
+      await getRecordingController
+        .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse, nextSpy);
+
+      expect(nextSpy.firstCall.args[0].status).to.equal(422);
+      expect(nextSpy.firstCall.args[0].message).to.equal('No start time passed to get recordings');
+    });
+
+    it('should pass 422 status code and error via Next to error handler if end time is not passed', async function () {
+      mockRequest.params.endTime = '';
+
+      await getRecordingController
+        .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse, nextSpy);
+
+      expect(nextSpy.firstCall.args[0].status).to.equal(422);
+      expect(nextSpy.firstCall.args[0].message).to.equal('No end time passed to get recordings');
+    });
+
+    it('should pass 422 status code and error via Next to error handler if space Id is not passed', async function () {
+      mockRequest.params.spaceId = '';
+
+      await getRecordingController
+        .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse, nextSpy);
+
+      expect(nextSpy.firstCall.args[0].status).to.equal(422);
+      expect(nextSpy.firstCall.args[0].message).to.equal('No space Id passed to get recordings');
     });
   });
 });

@@ -36,7 +36,7 @@
     {
         "type": "node",
         "request": "launch",
-        "name": "recording controller tests",
+        "name": "get recording controller tests",
         "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
         "args": [
             "-u",
@@ -44,7 +44,7 @@
             "--timeout",
             "999999",
             "--colors",
-            "./{,!(node_modules)/**/}*recording_controller_test.js"
+            "./{,!(node_modules)/**/}*get_recording_controller_test.js"
         ],
         "internalConsoleOptions": "openOnSessionStart"
     },
