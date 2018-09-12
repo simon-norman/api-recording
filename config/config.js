@@ -1,24 +1,36 @@
 
 const config = {
   development: {
+    webServer: {
+      port: 3000,
+    },
     recordingDatabase: {
       uri: 'mongodb://localhost:27017/test_recording_database',
     },
   },
 
   test: {
+    webServer: {
+      port: process.env.PORT,
+    },
     recordingDatabase: {
       uri: process.env.RECORDING_DATABASE_URI,
     },
   },
 
   qa: {
+    webServer: {
+      port: process.env.PORT,
+    },
     recordingDatabase: {
       uri: process.env.RECORDING_DATABASE_URI,
     },
   },
 
   production: {
+    webServer: {
+      port: process.env.PORT,
+    },
     recordingDatabase: {
       uri: process.env.RECORDING_DATABASE_URI,
     },
