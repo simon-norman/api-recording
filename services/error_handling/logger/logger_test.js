@@ -2,10 +2,9 @@
 const { expect } = require('chai');
 const Raven = require('raven');
 const sinon = require('sinon');
+const loggerFactory = require('./logger.js');
 
 describe('logger', () => {
-  let logException;
-  let wrapperToHandleUnhandledExceptions;
   let mockError;
   let consoleLogSpy;
   let stubbedRavenCaptureException;
@@ -23,18 +22,8 @@ describe('logger', () => {
   });
 
   describe('logging and error handling in production', () => {
-    before(() => {
-      process.env.NODE_ENV = 'production';
-      console.log(process.env.NODE_ENV);
-      ({ logException } = require('./logger.js'));
-    });
-
-    after(() => {
-      process.env.NODE_ENV = 'development';
-      delete (require.cache[require.resolve('./logger.js')]);
-    });
-
     it('should log exceptions with Raven when in production', async function () {
+      const { logException } = loggerFactory('production');
       mockError = new Error('error');
       logException(mockError);
 
@@ -43,12 +32,8 @@ describe('logger', () => {
   });
 
   describe('logging and error handling in development', () => {
-    before(() => {
-      process.env.NODE_ENV = 'development';
-      ({ logException, wrapperToHandleUnhandledExceptions } = require('./logger.js'));
-    });
-
     it('should log any unhandled exceptions to the console when NOT in production', function () {
+      const { wrapperToHandleUnhandledExceptions } = loggerFactory('development');
       wrapperToHandleUnhandledExceptions(() => {
         throw mockError;
       });
@@ -57,6 +42,7 @@ describe('logger', () => {
     });
 
     it('should log exception stack to the console when NOT in production', function () {
+      const { logException } = loggerFactory('development');
       logException(mockError);
 
       expect(consoleLogSpy.calledOnceWithExactly(mockError.stack)).to.equal(true);
