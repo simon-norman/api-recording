@@ -7,8 +7,8 @@
     "start": "node app.js",
     "unit-test": "nyc mocha --timeout=10000 \"**/*_test.js\"",
     "dev": "node app",
-    "start-test-heroku": "heroku ps:scale web=1 -a test-api-recordings",
-    "stop-test-heroku": "heroku ps:scale web=0 -a test-api-recordings"
+    "start-test-heroku": "heroku ps:scale web=1 -a test-api-recording",
+    "stop-test-heroku": "heroku ps:scale web=0 -a test-api-recording"
   },
   "engines" : { 
     "node" : "^8.12.0"
