@@ -126,6 +126,21 @@
     {
         "type": "node",
         "request": "launch",
+        "name": "logger tests",
+        "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+        "args": [
+            "-u",
+            "tdd",
+            "--timeout",
+            "999999",
+            "--colors",
+            "./{,!(node_modules)/**/}*logger_test.js"
+        ],
+        "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+        "type": "node",
+        "request": "launch",
         "name": "App wiring tests",
         "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
         "args": [

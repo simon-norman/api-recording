@@ -11,7 +11,8 @@ describe('logger', () => {
   let stubbedRavenCaptureException;
 
   before(() => {
-    mockError = new Error('error');
+    const mockErrorMessage = 'mock error message';
+    mockError = new Error(mockErrorMessage);
     consoleLogSpy = sinon.spy(console, 'log');
     stubbedRavenCaptureException = sinon.stub(Raven, 'captureException');
   });
@@ -54,10 +55,10 @@ describe('logger', () => {
       expect(consoleLogSpy.calledOnceWithExactly(mockError)).to.equal(true);
     });
 
-    it('should log exceptions to the console when NOT in production', function () {
+    it('should log exception stack to the console when NOT in production', function () {
       logException(mockError);
 
-      expect(consoleLogSpy.calledOnceWithExactly(mockError)).to.equal(true);
+      expect(consoleLogSpy.calledOnceWithExactly(mockError.stack)).to.equal(true);
     });
   });
 });
