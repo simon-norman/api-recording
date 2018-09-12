@@ -11,6 +11,16 @@ let config;
 let diContainer;
 let app;
 
+const configureRouting = () => {
+  const routes = diContainer.getDependency('routes');
+  app.use('/', routes);
+
+  app.use(cors());
+
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+};
+
 const setUpErrorHandler = () => {
   app.use((err, req, res, next) => {
     res.status(err.status || 500);
@@ -25,13 +35,7 @@ const setUpErrorHandler = () => {
 const setUpWebServer = () => {
   app = express();
 
-  const routes = diContainer.getDependency('routes');
-  app.use('/', routes);
-
-  app.use(cors());
-
-  app.use(bodyParser.json({ limit: '50mb' }));
-  app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+  configureRouting();
 
   setUpErrorHandler();
 
@@ -42,12 +46,13 @@ const connectToDatabase = () =>
   mongoose.connect(config.recordingDatabase.uri, { useNewUrlParser: true });
 
 const startApp = async () => {
-  config = getConfigForEnvironment(process.env.NODE_ENV);
-  diContainer = wireUpApp();
-
-  setUpWebServer();
-
   try {
+    diContainer = wireUpApp();
+
+    config = getConfigForEnvironment(process.env.NODE_ENV);
+
+    setUpWebServer();
+
     await connectToDatabase();
   } catch (error) {
     console.log(error);
