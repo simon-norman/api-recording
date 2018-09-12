@@ -25,6 +25,7 @@ describe('logger', () => {
   describe('logging and error handling in production', () => {
     before(() => {
       process.env.NODE_ENV = 'production';
+      console.log(process.env.NODE_ENV);
       ({ logException } = require('./logger.js'));
     });
 
