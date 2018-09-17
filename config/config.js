@@ -5,7 +5,7 @@ const config = {
       port: 3000,
     },
     recordingDatabase: {
-      uri: 'mongodb://localhost:27017/test_recording_database',
+      uri: 'mongodb://localhost:27017/tracking_app_dev',
     },
   },
 
