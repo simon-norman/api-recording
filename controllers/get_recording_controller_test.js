@@ -13,22 +13,97 @@ const { expect } = chai;
 
 
 describe('Recording_controller', () => {
-  describe('Get recordings', () => {
-    let mockRecordings;
-    let stubbedFindRecordings;
-    let mockRecordingModel;
+  let mockRequest;
+
+  const setUpMockRequest = () => {
+    mockRequest = {
+      query: {
+        // difference between start and end is 30 mins
+        // which is maximum allowed by controller
+        startTime: '1537191000000',
+        endTime: '1537191000002',
+        spaceId: '1A',
+      },
+    };
+  };
+
+  describe('Get recordings successfully', () => {
     let getRecordingController;
-    let mockRequest;
     let mockResponse;
-    let nextSpy;
     let config;
 
     const ensureRecordingCollectionEmpty = async () => {
       const recordings = await Recording.find({});
       if (recordings.length) {
-        Recording.collection.drop();
+        await Recording.collection.drop();
       }
     };
+
+    const getPromiseToLoadSingleMockRecordingIntoDb = async () => {
+      const mockRecording = new Recording({
+        objectId: '2',
+        timestampRecorded: 1537191000001,
+        longitude: 20,
+        latitude: 20,
+        estimatedDeviceCategory: 'Mobile phone',
+        spaceIds: ['1A', '2C'],
+      });
+      return mockRecording.save();
+    };
+
+    const loadMockRecordingsIntoDb = async () => {
+      const promisesToLoadRecordings = [];
+      for (let i = 1; i <= 3; i += 1) {
+        const promise = getPromiseToLoadSingleMockRecordingIntoDb();
+        promisesToLoadRecordings.push(promise);
+      }
+      await Promise.all(promisesToLoadRecordings);
+    };
+
+    const getExpectedRecordings = () => {
+      const startTimeAsDate = new Date(parseInt(mockRequest.query.startTime, 10));
+      const endTimeAsDate = new Date(parseInt(mockRequest.query.endTime, 10));
+      return Recording.find({
+        spaceIds: mockRequest.query.spaceId,
+        timestampRecorded: { $gte: startTimeAsDate, $lt: endTimeAsDate },
+      });
+    };
+
+    before(async () => {
+      config = getConfigForEnvironment(process.env.NODE_ENV);
+      await mongoose.connect(config.recordingDatabase.uri, { useNewUrlParser: true });
+
+      await ensureRecordingCollectionEmpty();
+      await loadMockRecordingsIntoDb();
+
+      getRecordingController = GetRecordingControllerFactory(Recording);
+
+      setUpMockRequest();
+      mockResponse = mockRes();
+    });
+
+    after(async () => {
+      await ensureRecordingCollectionEmpty();
+      await mongoose.connection.close();
+    });
+
+    it('should retrieve all recordings for a specified space id and timeframe', async function () {
+      const expectedRecordings = await getExpectedRecordings();
+      await getRecordingController
+        .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse);
+
+      expect(mockResponse.status).always.have.been.calledOnceWithExactly(200);
+      expect(mockResponse.json.args[0][0]).deep.equals(expectedRecordings);
+    });
+  });
+
+  describe('Validation and error handling when getting recordings', () => {
+    let mockRecordings;
+    let stubbedFindRecordings;
+    let mockRecordingModel;
+    let getRecordingController;
+    let mockResponse;
+    let nextSpy;
 
     const setUpMockRecordingModel = () => {
       mockRecordings = ['Recording 1', 'Recording 2'];
@@ -39,26 +114,7 @@ describe('Recording_controller', () => {
       };
     };
 
-    const setUpMockRequest = () => {
-      mockRequest = {
-        query: {
-          // difference between start and end is 30 mins
-          // which is maximum allowed by controller
-          startTime: '1537191000000',
-          endTime: '1537191000002',
-          spaceId: '1A',
-        },
-      };
-    };
-
-    before(async () => {
-      config = getConfigForEnvironment(process.env.NODE_ENV);
-      await mongoose.connect(config.recordingDatabase.uri, { useNewUrlParser: true });
-    });
-
     beforeEach(async () => {
-      await ensureRecordingCollectionEmpty();
-
       setUpMockRecordingModel();
 
       getRecordingController = GetRecordingControllerFactory(mockRecordingModel);
@@ -68,30 +124,6 @@ describe('Recording_controller', () => {
       mockResponse = mockRes();
 
       nextSpy = sinon.spy();
-    });
-
-    after(async () => {
-      await ensureRecordingCollectionEmpty();
-      await mongoose.connection.close();
-    });
-
-    it.only('should retrieve all recordings for a specified space id and timeframe', async function () {
-      const mockRecording = {
-        objectId: '2',
-        timestampRecorded: 1537191000001,
-        longitude: 20,
-        latitude: 20,
-        estimatedDeviceCategory: 'Mobile phone',
-        spaceIds: ['1A', '2C'],
-      };
-      const recording = new Recording(mockRecording);
-      await recording.save();
-      getRecordingController = GetRecordingControllerFactory(Recording);
-      await getRecordingController
-        .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse);
-
-      expect(mockResponse.status).always.have.been.calledOnceWithExactly(200);
-      expect(mockResponse.json).always.have.been.calledOnceWithExactly(mockRecordings);
     });
 
     it('should pass 404 error via Next to error handler if no recordings found', async function () {
