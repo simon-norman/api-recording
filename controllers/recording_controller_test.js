@@ -5,11 +5,8 @@ const sinonChai = require('sinon-chai');
 const { getConfigForEnvironment } = require('../config/config');
 const RecordingControllerFactory = require('./recording_controller');
 const Recording = require('../models/recording');
-const RecordingRoutesFactory = require('../routes/recording_routes');
-const ServerFactory = require('../server/server.js');
 const mongoose = require('mongoose');
 const { mockRes } = require('sinon-express-mock');
-const request = require('supertest');
 
 chai.use(sinonChai);
 const { expect } = chai;
@@ -61,19 +58,6 @@ describe('Recording_controller', () => {
       await Recording.insertMany(recordingsData);
     };
 
-    const getExpectedRecordings = async () => {
-      const startTimeAsDate = new Date(parseInt(mockRequest.query.startTime, 10));
-      const endTimeAsDate = new Date(parseInt(mockRequest.query.endTime, 10));
-
-      const expectedRecordings = await Recording.find({
-        spaceIds: mockRequest.query.spaceId,
-        timestampRecorded: { $gte: startTimeAsDate, $lt: endTimeAsDate },
-      });
-
-      const recordingsInSameFormatAsResponseBody = JSON.parse(JSON.stringify(expectedRecordings));
-      return recordingsInSameFormatAsResponseBody;
-    };
-
     before(async () => {
       config = getConfigForEnvironment(process.env.NODE_ENV);
       await mongoose.connect(config.recordingDatabase.uri, { useNewUrlParser: true });
@@ -93,21 +77,6 @@ describe('Recording_controller', () => {
     after(async () => {
       await ensureRecordingCollectionEmpty();
       await mongoose.connection.close();
-    });
-
-    it.only('should retrieve all recordings for a specified space id and timeframe', async function () {
-      await loadRecordingsIntoDb();
-
-      const recordingRoutes = RecordingRoutesFactory(recordingController);
-      const server = ServerFactory(recordingRoutes, config.webServer, sinon.stub());
-
-      const response = await request(server).get('/recordings')
-        .query(mockRequest.query);
-
-      const expectedRecordings = await getExpectedRecordings();
-
-      expect(response.status).equals(200);
-      expect(response.body).deep.equals(expectedRecordings);
     });
 
     it('should not retrieve recordings whose timestamp is equal or greater than to the specified end time', async function () {
