@@ -8,6 +8,9 @@ const Recording = require('../models/recording');
 const GetRecordingControllerFactory = require('../controllers/get_recording_controller');
 const RecordingRoutesFactory = require('../routes/recording_routes');
 const RoutesFactory = require('../routes/index');
+const { getConfigForEnvironment } = require('../config/config.js');
+const ServerFactory = require('../server/server.js');
+const requestsErrorHandler = require('../services/error_handling/requests_error_handler/requests_error_handler');
 
 let diContainer;
 let registerDependency;
@@ -46,6 +49,15 @@ const registerRoutes = () => {
   registerDependencyFromFactory('routes', RoutesFactory);
 };
 
+const registerServer = () => {
+  const webServerConfig = getConfigForEnvironment(process.env.NODE_ENV).webServer;
+  registerDependency('webServerConfig', webServerConfig);
+
+  registerDependency('requestsErrorHandler', requestsErrorHandler);
+
+  registerDependencyFromFactory('server', ServerFactory);
+};
+
 const wireUpApp = () => {
   setUpDiContainer();
 
@@ -53,6 +65,8 @@ const wireUpApp = () => {
   registerDependency('logException', logException);
 
   registerRoutes();
+
+  registerServer();
 
   return diContainer;
 };
