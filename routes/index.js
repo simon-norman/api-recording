@@ -2,7 +2,7 @@
 const router = require('express').Router();
 
 module.exports = (recordingRoutes) => {
-  router.use('/recordings', recordingRoutes);
+  router.use(recordingRoutes);
 
   return router;
 };

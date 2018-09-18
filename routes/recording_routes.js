@@ -1,9 +1,9 @@
 const express = require('express');
 
-module.exports = (getRecordingController) => {
+module.exports = (recordingController) => {
   const router = express.Router();
 
-  router.get('/', getRecordingController.getRecordingsBySpaceIdAndTimeframe);
+  router.get('/recordings/', recordingController.getRecordingsBySpaceIdAndTimeframe);
 
   return router;
 };
