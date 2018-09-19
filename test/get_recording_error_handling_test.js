@@ -2,10 +2,7 @@
 const chai = require('chai');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
-const { getConfigForEnvironment } = require('../config/config');
-const RecordingControllerFactory = require('./get_recording_controller');
-const Recording = require('../models/recording');
-const mongoose = require('mongoose');
+const RecordingControllerFactory = require('../controllers/get_recording_controller');
 const { mockRes } = require('sinon-express-mock');
 
 chai.use(sinonChai);
@@ -26,78 +23,6 @@ describe('Recording_controller', () => {
       },
     };
   };
-
-  describe('Get recordings successfully', () => {
-    let recordingsData;
-    let recordingController;
-    let mockResponse;
-    let config;
-
-    const ensureRecordingCollectionEmpty = async () => {
-      const recordings = await Recording.find({});
-      if (recordings.length) {
-        await Recording.collection.drop();
-      }
-    };
-
-    const resetRecordingsData = () => {
-      recordingsData = [];
-      for (let i = 1; i <= 4; i += 1) {
-        recordingsData.push({
-          objectId: '2',
-          timestampRecorded: 1537191000001,
-          longitude: 20,
-          latitude: 20,
-          estimatedDeviceCategory: 'Mobile phone',
-          spaceIds: ['1A', '2C'],
-        });
-      }
-    };
-
-    const loadRecordingsIntoDb = async () => {
-      await Recording.insertMany(recordingsData);
-    };
-
-    before(async () => {
-      config = getConfigForEnvironment(process.env.NODE_ENV);
-      await mongoose.connect(config.recordingDatabase.uri, { useNewUrlParser: true });
-    });
-
-    beforeEach(async () => {
-      resetRecordingsData();
-
-      recordingController = RecordingControllerFactory(Recording);
-
-      setUpMockRequest();
-      mockResponse = mockRes();
-
-      await ensureRecordingCollectionEmpty();
-    });
-
-    after(async () => {
-      await ensureRecordingCollectionEmpty();
-      await mongoose.connection.close();
-    });
-
-    it('should not retrieve recordings whose timestamp is equal or greater than to the specified end time', async function () {
-      recordingsData[0].timestampRecorded = 1537191000002;
-      recordingsData[1].timestampRecorded = 1537191000003;
-      await loadRecordingsIntoDb();
-      await recordingController
-        .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse);
-
-      expect(mockResponse.json.args[0][0].length).equals(2);
-    });
-
-    it('should not retrieve recordings whose timestamp is less than the specified start time', async function () {
-      recordingsData[0].timestampRecorded = 1537190999999;
-      await loadRecordingsIntoDb();
-      await recordingController
-        .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse);
-
-      expect(mockResponse.json.args[0][0].length).equals(3);
-    });
-  });
 
   describe('Validation and error handling when getting recordings', () => {
     let mockRecordings;

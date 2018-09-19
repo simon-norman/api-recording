@@ -5,7 +5,7 @@ const sinonChai = require('sinon-chai');
 const { getConfigForEnvironment } = require('../config/config');
 const GetRecordingControllerFactory = require('../controllers/get_recording_controller');
 const Recording = require('../models/recording');
-const RecordingRoutesFactory = require('../routes/recording_routes');
+const GetRecordingRoutesFactory = require('../routes/recording_routes');
 const ServerFactory = require('../server/server');
 const mongoose = require('mongoose');
 const request = require('supertest');
@@ -24,7 +24,7 @@ describe('Recording_actions', () => {
 
     const setUpRecordingEndpoints = () => {
       const getRecordingController = GetRecordingControllerFactory(Recording);
-      const recordingRoutes = RecordingRoutesFactory(getRecordingController);
+      const recordingRoutes = GetRecordingRoutesFactory(getRecordingController);
       server = ServerFactory(recordingRoutes, config.webServer, sinon.stub());
     };
 

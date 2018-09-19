@@ -5,7 +5,8 @@ const DiContainerStampFactory = require('./di_container');
 const DiContainerInclStampsStampFactory = require('./di_container_incl_stamps');
 const LoggerFactory = require('../services/error_handling/logger/logger.js');
 const Recording = require('../models/recording');
-const RecordingControllerFactory = require('../controllers/recording_controller');
+const SaveRecordingControllerFactory = require('../controllers/save_recording_controller');
+const GetRecordingControllerFactory = require('../controllers/get_recording_controller');
 const RecordingRoutesFactory = require('../routes/recording_routes');
 const RoutesFactory = require('../routes/index');
 const { getConfigForEnvironment } = require('../config/config.js');
@@ -39,7 +40,10 @@ const setUpDiContainer = () => {
 
 const registerRecordingRoutes = () => {
   registerDependency('Recording', Recording);
-  registerDependencyFromFactory('recordingController', RecordingControllerFactory);
+
+  registerDependencyFromFactory('saveRecordingController', SaveRecordingControllerFactory);
+  registerDependencyFromFactory('getRecordingController', GetRecordingControllerFactory);
+
   registerDependencyFromFactory('recordingRoutes', RecordingRoutesFactory);
 };
 

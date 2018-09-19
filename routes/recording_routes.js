@@ -1,9 +1,11 @@
 const express = require('express');
 
-module.exports = (recordingController) => {
+module.exports = (getRecordingController, saveRecordingController) => {
   const router = express.Router();
 
-  router.get('/recordings/', recordingController.getRecordingsBySpaceIdAndTimeframe);
+  router.get('/', getRecordingController.getRecordingsBySpaceIdAndTimeframe);
+
+  router.post('/', saveRecordingController.saveRecordings);
 
   return router;
 };
