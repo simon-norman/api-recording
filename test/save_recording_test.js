@@ -5,7 +5,6 @@ const sinonChai = require('sinon-chai');
 const mongoose = require('mongoose');
 const request = require('supertest');
 const Recording = require('../models/recording');
-const bodyParser = require('body-parser');
 const promiseToLoadApp = require('../app.js');
 
 chai.use(sinonChai);
@@ -55,22 +54,15 @@ describe('Recording_actions', () => {
     });
 
     it('should save the recording successfully to the database', async function () {
-      // set up
-      // post recording
-      // get recordings from database
-      // check matches posted recording
-
       const response = await request(app)
         .post('/recordings')
-        .send({ somedata: 'somedata' })
-        .set('Content-Type', 'application/json')
-        .set('Accept', 'application/json');
+        .send(mockRecordings);
 
       const recordingsInDb = await Recording.find({});
+      const recordingsInSameFormatAsResponseBody = JSON.parse(JSON.stringify(recordingsInDb));
 
       expect(response.status).equals(200);
-      expect(response.body).deep.equals(recordingsInDb);
-      expect(response.body.length).equals(3);
+      expect(response.body).deep.equals(recordingsInSameFormatAsResponseBody);
     });
   });
 });

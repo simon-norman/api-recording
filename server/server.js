@@ -4,14 +4,14 @@ const bodyParser = require('body-parser');
 
 module.exports = (routes, webServerConfig, requestsErrorHandler) => {
   const server = express();
-  server.use('/', routes);
-
   server.use(cors());
 
   server.use(bodyParser.json({ limit: '50mb' }));
   server.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
   server.use(requestsErrorHandler);
+
+  server.use('/', routes);
 
   server.listen(webServerConfig.port);
 
