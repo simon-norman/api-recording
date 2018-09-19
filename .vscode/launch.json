@@ -51,6 +51,21 @@
     {
         "type": "node",
         "request": "launch",
+        "name": "recording integration tests",
+        "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+        "args": [
+            "-u",
+            "tdd",
+            "--timeout",
+            "999999",
+            "--colors",
+            "./{,!(node_modules)/**/}*recording_integration_test.js"
+        ],
+        "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+        "type": "node",
+        "request": "launch",
         "name": "recording model tests",
         "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
         "args": [
