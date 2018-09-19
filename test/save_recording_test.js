@@ -12,7 +12,7 @@ const { expect } = chai;
 
 
 describe('Recording_actions', () => {
-  describe('Save recordings successfully', () => {
+  describe('Save recordings', () => {
     let mockRecordings;
     let app;
 
@@ -63,6 +63,17 @@ describe('Recording_actions', () => {
 
       expect(response.status).equals(200);
       expect(response.body).deep.equals(recordingsInSameFormatAsResponseBody);
+    });
+
+    it('should return an error response if an error is thrown during save recordings', async function () {
+      const stubbedInsertManyRecordings = sinon.stub(Recording, 'insertMany');
+      stubbedInsertManyRecordings.throws();
+
+      const response = await request(app)
+        .post('/recordings')
+        .send(mockRecordings);
+
+      expect(response.status).equals(500);
     });
   });
 });

@@ -32,15 +32,6 @@ describe('logger', () => {
   });
 
   describe('logging and error handling in development', () => {
-    it('should log any unhandled exceptions to the console when NOT in production', function () {
-      const { wrapperToHandleUnhandledExceptions } = LoggerFactory('development');
-      wrapperToHandleUnhandledExceptions(() => {
-        throw mockError;
-      });
-
-      expect(consoleLogSpy.calledOnceWithExactly(mockError)).to.equal(true);
-    });
-
     it('should log exception stack to the console when NOT in production', function () {
       const { logException } = LoggerFactory('development');
       logException(mockError);
