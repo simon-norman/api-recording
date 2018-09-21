@@ -3,7 +3,6 @@ const DependencyNotFoundError = require('../services/error_handling/errors/Depen
 const DependencyAlreadyRegisteredError = require('../services/error_handling/errors/DependencyAlreadyRegisteredError');
 const DiContainerStampFactory = require('./di_container');
 const DiContainerInclStampsStampFactory = require('./di_container_incl_stamps');
-const LoggerFactory = require('../services/error_handling/logger/logger.js');
 const Recording = require('../models/recording');
 const SaveRecordingControllerFactory = require('../controllers/save_recording_controller');
 const GetRecordingControllerFactory = require('../controllers/get_recording_controller');
@@ -64,9 +63,6 @@ const registerServer = () => {
 
 const wireUpApp = () => {
   setUpDiContainer();
-
-  const { logException } = LoggerFactory(process.env.NODE_ENV);
-  registerDependency('logException', logException);
 
   registerRoutes();
 
