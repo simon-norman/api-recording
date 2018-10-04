@@ -2,7 +2,7 @@
 const jwt = require('express-jwt');
 const jwks = require('jwks-rsa');
 
-const setUpAuthorization = (app) => {
+const addAuthorizationToApp = (app) => {
   const jwtCheck = jwt({
     secret: jwks.expressJwtSecret({
       cache: true,
@@ -21,4 +21,4 @@ const setUpAuthorization = (app) => {
 };
 
 
-module.exports = setUpAuthorization;
+module.exports = addAuthorizationToApp;
