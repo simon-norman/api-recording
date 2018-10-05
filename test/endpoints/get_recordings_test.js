@@ -4,11 +4,8 @@ const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 const mongoose = require('mongoose');
 const request = require('supertest');
-const { getConfigForEnvironment } = require('../../config/config.js');
 const Recording = require('../../models/recording');
-const bodyParser = require('body-parser');
-const express = require('express');
-const wireUpAppForTestingEndpoints = require('./app_wiring_for_testing_endpoints.js');
+const setUpAppForTestingEndpoints = require('./app_setup_for_testing_endpoints');
 
 chai.use(sinonChai);
 const { expect } = chai;
@@ -16,7 +13,7 @@ const { expect } = chai;
 const sinonSandbox = sinon.sandbox.create();
 
 
-describe('Recording_actions', () => {
+describe('Get recordings endpoint,', function () {
   let app;
   let mockRecordings;
 
@@ -41,32 +38,8 @@ describe('Recording_actions', () => {
     }
   };
 
-  const connectToDatabase = () => {
-    const config = getConfigForEnvironment(process.env.NODE_ENV);
-    return mongoose.connect(config.recordingDatabase.uri, { useNewUrlParser: true });
-  };
-
-
-  const setUpTestApp = async () => {
-    await connectToDatabase();
-
-    const diContainer = wireUpAppForTestingEndpoints();
-
-    app = express();
-    app.use(bodyParser.json({ limit: '50mb' }));
-    app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
-
-    const routes = diContainer.getDependency('routes');
-    app.use('/', routes);
-
-    const requestsErrorHandler = diContainer.getDependency('requestsErrorHandler');
-    app.use(requestsErrorHandler);
-
-    app.listen(3000);
-  };
-
   before(async () => {
-    setUpTestApp();
+    app = await setUpAppForTestingEndpoints();
   });
 
   beforeEach(async () => {
@@ -85,32 +58,7 @@ describe('Recording_actions', () => {
     process.exit();
   });
 
-  describe('Save recordings', () => {
-    it('should save the recording successfully to the database', async function () {
-      const response = await request(app)
-        .post('/recordings')
-        .send(mockRecordings);
-
-      const recordingsInDb = await Recording.find({});
-      const recordingsInSameFormatAsResponseBody = JSON.parse(JSON.stringify(recordingsInDb));
-
-      expect(response.status).equals(200);
-      expect(response.body).deep.equals(recordingsInSameFormatAsResponseBody);
-    });
-
-    it('should return an error response if an error is thrown during save recordings', async function () {
-      const stubbedInsertManyRecordings = sinonSandbox.stub(Recording, 'insertMany');
-      stubbedInsertManyRecordings.throws();
-
-      const response = await request(app)
-        .post('/recordings')
-        .send(mockRecordings);
-
-      expect(response.status).equals(500);
-    });
-  });
-
-  describe('Get recordings successfully', () => {
+  describe('Get recordings successfully', function () {
     let mockQuery;
 
     const setUpMockRequest = () => {

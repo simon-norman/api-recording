@@ -9,6 +9,10 @@ const GetRecordingControllerFactory = require('../../controllers/get_recording_c
 const RecordingRoutesFactory = require('../../routes/recording_routes');
 const RoutesFactory = require('../../routes/index');
 const requestsErrorHandler = require('../../services/error_handling/requests_error_handler/requests_error_handler');
+const { getConfigForEnvironment } = require('../../config/config.js');
+const bodyParser = require('body-parser');
+const express = require('express');
+const mongoose = require('mongoose');
 
 let diContainer;
 let registerDependency;
@@ -50,14 +54,33 @@ const registerRoutes = () => {
   registerDependencyFromFactory('routes', RoutesFactory);
 };
 
-const wireUpAppForTestingEndpoints = () => {
+const wireUpApp = () => {
   setUpDiContainer();
 
   registerRoutes();
-
-  registerDependency('requestsErrorHandler', requestsErrorHandler);
-
-  return diContainer;
 };
 
-module.exports = wireUpAppForTestingEndpoints;
+const connectToDatabase = () => {
+  const config = getConfigForEnvironment(process.env.NODE_ENV);
+  return mongoose.connect(config.recordingDatabase.uri, { useNewUrlParser: true });
+};
+
+const setUpAppForTestingEndpoints = async () => {
+  wireUpApp();
+
+  await connectToDatabase();
+
+  const app = express();
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+
+  const routes = diContainer.getDependency('routes');
+  app.use('/', routes);
+
+  app.use(requestsErrorHandler);
+
+  app.listen(3000);
+  return app;
+};
+
+module.exports = setUpAppForTestingEndpoints;
