@@ -4,8 +4,11 @@ const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 const mongoose = require('mongoose');
 const request = require('supertest');
-const Recording = require('../models/recording');
-const startApp = require('../app_startup');
+const { getConfigForEnvironment } = require('../../config/config.js');
+const Recording = require('../../models/recording');
+const bodyParser = require('body-parser');
+const express = require('express');
+const wireUpAppForTestingEndpoints = require('./app_wiring_for_testing_endpoints.js');
 
 chai.use(sinonChai);
 const { expect } = chai;
@@ -38,8 +41,32 @@ describe('Recording_actions', () => {
     }
   };
 
+  const connectToDatabase = () => {
+    const config = getConfigForEnvironment(process.env.NODE_ENV);
+    return mongoose.connect(config.recordingDatabase.uri, { useNewUrlParser: true });
+  };
+
+
+  const setUpTestApp = async () => {
+    await connectToDatabase();
+
+    const diContainer = wireUpAppForTestingEndpoints();
+
+    app = express();
+    app.use(bodyParser.json({ limit: '50mb' }));
+    app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+
+    const routes = diContainer.getDependency('routes');
+    app.use('/', routes);
+
+    const requestsErrorHandler = diContainer.getDependency('requestsErrorHandler');
+    app.use(requestsErrorHandler);
+
+    app.listen(3000);
+  };
+
   before(async () => {
-    app = await startApp();
+    setUpTestApp();
   });
 
   beforeEach(async () => {
