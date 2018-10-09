@@ -2,8 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-module.exports = (routes, webServerConfig, requestsErrorHandler) => {
-  const server = express();
+module.exports = (routes, webServerConfig, requestsErrorHandler, addAuthorizationToApp) => {
+  let server = express();
+
+  server = addAuthorizationToApp(server);
   server.use(cors());
 
   server.use(bodyParser.json({ limit: '50mb' }));

@@ -7,6 +7,7 @@ const Recording = require('../models/recording');
 const SaveRecordingControllerFactory = require('../controllers/save_recording_controller');
 const GetRecordingControllerFactory = require('../controllers/get_recording_controller');
 const RecordingRoutesFactory = require('../routes/recording_routes');
+const addAuthorizationToApp = require('../services/authorization/auth.js');
 const RoutesFactory = require('../routes/index');
 const { getConfigForEnvironment } = require('../config/config.js');
 const ServerFactory = require('../server/server.js');
@@ -55,6 +56,8 @@ const registerRoutes = () => {
 const registerServer = () => {
   const webServerConfig = getConfigForEnvironment(process.env.NODE_ENV).webServer;
   registerDependency('webServerConfig', webServerConfig);
+
+  registerDependency('addAuthorizationToApp', addAuthorizationToApp);
 
   registerDependency('requestsErrorHandler', requestsErrorHandler);
 

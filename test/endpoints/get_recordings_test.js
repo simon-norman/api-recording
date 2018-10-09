@@ -4,8 +4,8 @@ const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 const mongoose = require('mongoose');
 const request = require('supertest');
-const Recording = require('../models/recording');
-const startApp = require('../app_startup');
+const Recording = require('../../models/recording');
+const setUpAppForTestingEndpoints = require('./app_setup_for_testing_endpoints');
 
 chai.use(sinonChai);
 const { expect } = chai;
@@ -13,7 +13,7 @@ const { expect } = chai;
 const sinonSandbox = sinon.sandbox.create();
 
 
-describe('Recording_actions', () => {
+describe('Get recordings endpoint,', function () {
   let app;
   let mockRecordings;
 
@@ -39,7 +39,7 @@ describe('Recording_actions', () => {
   };
 
   before(async () => {
-    app = await startApp();
+    app = await setUpAppForTestingEndpoints();
   });
 
   beforeEach(async () => {
@@ -58,32 +58,7 @@ describe('Recording_actions', () => {
     process.exit();
   });
 
-  describe('Save recordings', () => {
-    it('should save the recording successfully to the database', async function () {
-      const response = await request(app)
-        .post('/recordings')
-        .send(mockRecordings);
-
-      const recordingsInDb = await Recording.find({});
-      const recordingsInSameFormatAsResponseBody = JSON.parse(JSON.stringify(recordingsInDb));
-
-      expect(response.status).equals(200);
-      expect(response.body).deep.equals(recordingsInSameFormatAsResponseBody);
-    });
-
-    it('should return an error response if an error is thrown during save recordings', async function () {
-      const stubbedInsertManyRecordings = sinonSandbox.stub(Recording, 'insertMany');
-      stubbedInsertManyRecordings.throws();
-
-      const response = await request(app)
-        .post('/recordings')
-        .send(mockRecordings);
-
-      expect(response.status).equals(500);
-    });
-  });
-
-  describe('Get recordings successfully', () => {
+  describe('Get recordings successfully', function () {
     let mockQuery;
 
     const setUpMockRequest = () => {

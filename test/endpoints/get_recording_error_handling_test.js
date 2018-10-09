@@ -2,7 +2,7 @@
 const chai = require('chai');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
-const RecordingControllerFactory = require('../controllers/get_recording_controller');
+const RecordingControllerFactory = require('../../controllers/get_recording_controller');
 const { mockRes } = require('sinon-express-mock');
 
 chai.use(sinonChai);

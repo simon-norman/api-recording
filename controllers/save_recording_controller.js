@@ -10,7 +10,12 @@ module.exports = (Recording) => {
 
       response.status(200).json(savedRecordings);
     } catch (error) {
-      next(error);
+      if (error.name === 'ValidationError') {
+        error.status = 422;
+        next(error);
+      } else {
+        next(error);
+      }
     }
   };
 
