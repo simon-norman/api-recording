@@ -1,7 +1,7 @@
 {
   "name": "api-recording",
   "version": "1.0.0",
-  "description": "API for inserting and adding raw recordings of people's locations within set spaces",
+  "description": "API for inserting and adding raw recordings of people's locations within set spaces ",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
