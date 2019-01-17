@@ -3,17 +3,17 @@
 module.exports = (Recording) => {
   const getRecordingController = {};
 
-  const checkSpaceIdTimeframeValuesValid = (params) => {
+  const checkSpaceIdTimeframeValuesValid = (query) => {
     const spaceIdTimeframeUndefinedErrors = [];
-    if (!params.startTime) {
+    if (!query.startTime) {
       spaceIdTimeframeUndefinedErrors.push('No start time passed to get recordings');
     }
 
-    if (!params.endTime) {
+    if (!query.endTime) {
       spaceIdTimeframeUndefinedErrors.push('No end time passed to get recordings');
     }
 
-    if (!params.spaceId) {
+    if (!query.spaceId) {
       spaceIdTimeframeUndefinedErrors.push('No space Id passed to get recordings');
     }
 
@@ -24,26 +24,37 @@ module.exports = (Recording) => {
     }
   };
 
-  const checkTimeframeLessThan30Mins = (params) => {
-    if ((params.endTime - params.startTime) > 1800000) {
+  const checkTimeframeLessThan30Mins = (query) => {
+    if ((query.endTime - query.startTime) > 1800000) {
       const error = new Error('Timeframe is invalid as it is more than 30 minutes');
       error.status = 422;
       throw error;
     }
   };
 
-  const checkSpaceIdAndTimeframeParams = (params) => {
-    checkSpaceIdTimeframeValuesValid(params);
+  const checkSpaceIdAndTimeframeQueryValues = (query) => {
+    checkSpaceIdTimeframeValuesValid(query);
 
-    checkTimeframeLessThan30Mins(params);
+    checkTimeframeLessThan30Mins(query);
+  };
+
+  const getTimestampRecordedQuery = (query) => {
+    const startTimeAsDate = new Date(parseInt(query.startTime, 10));
+    const endTimeAsDate = new Date(parseInt(query.endTime, 10));
+
+    return { $gte: startTimeAsDate, $lt: endTimeAsDate };
   };
 
   getRecordingController.getRecordingsBySpaceIdAndTimeframe = async (request, response, next) => {
     try {
-      checkSpaceIdAndTimeframeParams(request.params);
+      const { query } = request;
+      checkSpaceIdAndTimeframeQueryValues(query);
+
+      const timestampRecordedQuery = getTimestampRecordedQuery(query);
+
       const recordings = await Recording.find({
-        spaceId: request.params.spaceId,
-        timestampRecorded: { $gte: request.params.startTime, $lt: request.params.endTime },
+        spaceIds: query.spaceId,
+        timestampRecorded: timestampRecordedQuery,
       });
 
       if (recordings.length) {

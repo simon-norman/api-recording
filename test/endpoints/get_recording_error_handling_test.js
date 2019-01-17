@@ -2,7 +2,7 @@
 const chai = require('chai');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
-const GetRecordingControllerFactory = require('./get_recording_controller');
+const RecordingControllerFactory = require('../../controllers/get_recording_controller');
 const { mockRes } = require('sinon-express-mock');
 
 chai.use(sinonChai);
@@ -10,12 +10,25 @@ const { expect } = chai;
 
 
 describe('Recording_controller', () => {
-  describe('Get recordings', () => {
+  let mockRequest;
+
+  const setUpMockRequest = () => {
+    mockRequest = {
+      query: {
+        // difference between start and end is 30 mins
+        // which is maximum allowed by controller
+        startTime: '1537191000000',
+        endTime: '1537191000002',
+        spaceId: '1A',
+      },
+    };
+  };
+
+  describe('Validation and error handling when getting recordings', () => {
     let mockRecordings;
     let stubbedFindRecordings;
     let mockRecordingModel;
-    let getRecordingController;
-    let mockRequest;
+    let recordingController;
     let mockResponse;
     let nextSpy;
 
@@ -28,22 +41,10 @@ describe('Recording_controller', () => {
       };
     };
 
-    const setUpMockRequest = () => {
-      mockRequest = {
-        params: {
-          // difference between start and end is 30 mins
-          // which is maximum allowed by controller
-          startTime: 1536305400000,
-          endTime: 1536307200000,
-          spaceId: '1A',
-        },
-      };
-    };
-
-    beforeEach(() => {
+    beforeEach(async () => {
       setUpMockRecordingModel();
 
-      getRecordingController = GetRecordingControllerFactory(mockRecordingModel);
+      recordingController = RecordingControllerFactory(mockRecordingModel);
 
       setUpMockRequest();
 
@@ -52,25 +53,9 @@ describe('Recording_controller', () => {
       nextSpy = sinon.spy();
     });
 
-    it('should retrieve all recordings for a specified space id and timeframe', async function () {
-      await getRecordingController
-        .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse);
-
-      expect(stubbedFindRecordings).always.have.been.calledOnceWithExactly({
-        spaceId: mockRequest.params.spaceId,
-        timestampRecorded:
-        {
-          $gte: mockRequest.params.startTime,
-          $lt: mockRequest.params.endTime,
-        },
-      });
-      expect(mockResponse.status).always.have.been.calledOnceWithExactly(200);
-      expect(mockResponse.json).always.have.been.calledOnceWithExactly(mockRecordings);
-    });
-
     it('should pass 404 error via Next to error handler if no recordings found', async function () {
       stubbedFindRecordings.returns(Promise.resolve([]));
-      await getRecordingController
+      await recordingController
         .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse, nextSpy);
 
       expect(nextSpy.firstCall.args[0].status).to.equal(404);
@@ -81,16 +66,16 @@ describe('Recording_controller', () => {
       const errorDuringFind = new Error();
       stubbedFindRecordings.returns(Promise.reject(errorDuringFind));
 
-      await getRecordingController
+      await recordingController
         .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse, nextSpy);
 
       expect(nextSpy.firstCall.args[0]).to.be.an.instanceof(Error);
     });
 
     it('should pass 422 status code and error via Next to error handler if timeframe is more than 30 mins', async function () {
-      mockRequest.params.startTime = 1536305399999;
+      mockRequest.query.startTime = 1536305399999;
 
-      await getRecordingController
+      await recordingController
         .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse, nextSpy);
 
       expect(nextSpy.firstCall.args[0].status).to.equal(422);
@@ -98,9 +83,9 @@ describe('Recording_controller', () => {
     });
 
     it('should pass 422 status code and error via Next to error handler if start time is not passed', async function () {
-      mockRequest.params.startTime = '';
+      mockRequest.query.startTime = '';
 
-      await getRecordingController
+      await recordingController
         .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse, nextSpy);
 
       expect(nextSpy.firstCall.args[0].status).to.equal(422);
@@ -108,9 +93,9 @@ describe('Recording_controller', () => {
     });
 
     it('should pass 422 status code and error via Next to error handler if end time is not passed', async function () {
-      mockRequest.params.endTime = '';
+      mockRequest.query.endTime = '';
 
-      await getRecordingController
+      await recordingController
         .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse, nextSpy);
 
       expect(nextSpy.firstCall.args[0].status).to.equal(422);
@@ -118,9 +103,9 @@ describe('Recording_controller', () => {
     });
 
     it('should pass 422 status code and error via Next to error handler if space Id is not passed', async function () {
-      mockRequest.params.spaceId = '';
+      mockRequest.query.spaceId = '';
 
-      await getRecordingController
+      await recordingController
         .getRecordingsBySpaceIdAndTimeframe(mockRequest, mockResponse, nextSpy);
 
       expect(nextSpy.firstCall.args[0].status).to.equal(422);

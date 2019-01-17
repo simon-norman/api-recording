@@ -13,7 +13,7 @@ describe('config', () => {
 
     it('should throw an error when environment specified is not found in config', async () => {
       const wrappedGetConfigForEnvironment = () => {
-        getConfigForEnvironment('fakeenvironment');
+        getConfigForEnvironment('fake environment');
       };
       expect(wrappedGetConfigForEnvironment).to.throw(Error);
     });

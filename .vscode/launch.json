@@ -36,7 +36,7 @@
     {
         "type": "node",
         "request": "launch",
-        "name": "get recording controller tests",
+        "name": "get recording error handling tests",
         "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
         "args": [
             "-u",
@@ -44,7 +44,37 @@
             "--timeout",
             "999999",
             "--colors",
-            "./{,!(node_modules)/**/}*get_recording_controller_test.js"
+            "./{,!(node_modules)/**/}*get_recording_error_handling_test.js"
+        ],
+        "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+        "type": "node",
+        "request": "launch",
+        "name": "save recordings test",
+        "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+        "args": [
+            "-u",
+            "tdd",
+            "--timeout",
+            "999999",
+            "--colors",
+            "./{,!(node_modules)/**/}*save_recording_test.js"
+        ],
+        "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+        "type": "node",
+        "request": "launch",
+        "name": "get recordings test",
+        "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+        "args": [
+            "-u",
+            "tdd",
+            "--timeout",
+            "999999",
+            "--colors",
+            "./{,!(node_modules)/**/}*get_recording_test.js"
         ],
         "internalConsoleOptions": "openOnSessionStart"
     },
@@ -75,6 +105,21 @@
             "999999",
             "--colors",
             "./{,!(node_modules)/**/}*device_info_test.js"
+        ],
+        "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+        "type": "node",
+        "request": "launch",
+        "name": "authorization tests",
+        "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+        "args": [
+            "-u",
+            "tdd",
+            "--timeout",
+            "999999",
+            "--colors",
+            "./{,!(node_modules)/**/}*auth_test.js"
         ],
         "internalConsoleOptions": "openOnSessionStart"
     },
@@ -120,6 +165,21 @@
             "999999",
             "--colors",
             "./{,!(node_modules)/**/}*di_container_incl_stamps_test.js"
+        ],
+        "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+        "type": "node",
+        "request": "launch",
+        "name": "logger tests",
+        "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+        "args": [
+            "-u",
+            "tdd",
+            "--timeout",
+            "999999",
+            "--colors",
+            "./{,!(node_modules)/**/}*logger_test.js"
         ],
         "internalConsoleOptions": "openOnSessionStart"
     },
